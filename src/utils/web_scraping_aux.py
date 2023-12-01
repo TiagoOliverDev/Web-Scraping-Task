@@ -1,17 +1,13 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import  Service
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
+
 import json
-from typing import List
 import pandas as pd
 
-import time
 
 @dataclass
 class Item:
@@ -27,209 +23,102 @@ class Item:
     team: str = ''             # team name, for over/under bets this will be either team name or total
     spread: float = 0.0        # for handicap and over/under bets, e.g. -1.5, +2.5
 
-class Web_scraping_aux:
-    # def __init__(self, caminho_driver):
-    #     self.driver = webdriver.Chrome(executable_path=caminho_driver)
 
-        
+class Web_scraping_aux:
     def __init__(self):
         self.driver = self.init_chrome_driver()
 
     def create_df_and_json(self, data: str):
-        df = pd.DataFrame(data)
+        try:
+            df = pd.DataFrame(data)
 
-        data_dict = {}
-        data_dict['Dados'] = df.to_dict('records')
+            data_dict = {}
+            data_dict['Dados'] = df.to_dict('records')
 
-        js = json.dumps(data_dict)
-        fp = open('dados_bet.json', 'w')
-        fp.write(js)
-        fp.close()
-
-    def clean_html(self, html):
-        # Utiliza o BeautifulSoup para extrair o texto do HTML sem as tags
-        soup = BeautifulSoup(html, 'html.parser')
-        return soup.get_text(strip=True)
-    
-    def remover_tabs(self, texto):
-        # Remove caracteres de tabulação (\t)
-        return texto.replace('\t', '')
+            js = json.dumps(data_dict)
+            fp = open('dados_bet.json', 'w')
+            fp.write(js)
+            fp.close()
+                
+        except Exception as e:
+            print(f"Error in create_df_and_json(). CODE: {e}")
+            return None
 
     def init_chrome_driver(self):
-        # Use ChromeDriverManager para instalar e obter o caminho do chromedriver automaticamente
-        driver_path = ChromeDriverManager().install()
+        try:
+            driver_path = ChromeDriverManager().install()
 
-        # Inicialize o serviço do Chrome
-        service = webdriver.chrome.service.Service(driver_path)
+            service = webdriver.chrome.service.Service(driver_path)
 
-        # Configurar as opções do Chrome, se necessário
-        options = webdriver.ChromeOptions()
+            options = webdriver.ChromeOptions()
 
-        # Inicializar o driver do Chrome
-        driver = webdriver.Chrome(service=service, options=options)
+            driver = webdriver.Chrome(service=service, options=options)
 
-        return driver
-        # service = Service()                 # Classe usada para iniciar uma instância de chrome webdriver
-        # options = webdriver.ChromeOptions() # preferências do browser do chrome
-        # options.add_argument('--incognito')
-        # # options.add_argument('--enable-mobile-emulation')
-        # options.add_argument("--disable-infobars");
-        # # options.AddUserProfilePreference("credentials_enable_service", false);
-        # # options.AddUserProfilePreference("profile.password_manager_enabled", false);
-        # driver = webdriver.Chrome(service=service, options=options)
-        # return driver
+            return driver
+        
+        except Exception as e:
+            print(f"Error in init_chrome_driver(). CODE: {e}")
+            return None
 
-    def go_to_page(self, *, url: str):
-        # driver = self.init_chrome_driver()
-        self.driver.get(url)
-        # time.sleep(3)
+    def go_to_page(self, url: str):
+        try:
+            self.driver.get(url)
+        except Exception as e:
+            print(f"Error in go_to_page(). CODE: {e}")
+            return None
 
-    def clicar_em_botao(self, xpath_botao):
-        # teste = xpath_botao
-        # btns = self.driver.find_elements(By.TAG_NAME, 'a')[0].text
-        # print(btns)
-        # time.sleep(5)
-        # # driver = self.init_chrome_driver()
-        # Aguarde até que o botão esteja presente
-        self.esperar_elemento_aparecer(timeout=10, xpath=xpath_botao)
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, xpath_botao))
-        )
+    def click_btn(self, xpath_btn: str):
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, xpath_btn))
+            )
 
-        # # Encontre o botão pelo XPath e clique nele
-        botao = self.driver.find_element(By.XPATH, xpath_botao)
-        botao.click()
-        print('botao clicado')
+            botao = self.driver.find_element(By.XPATH, xpath_btn)
+            botao.click()
+        except Exception as e:
+            print(f"Error in click_btn(). CODE: {e}")
+            return None
 
-    def esperar_elemento_aparecer(self, timeout, xpath):
+    def wait_for_element(self, timeout: int, xpath: str):
         WebDriverWait(self.driver, timeout).until(
             EC.presence_of_element_located((By.XPATH, xpath))
         )
 
-    def teste(self, xpath_base, num_linhas): 
-        print('1')
-        self.go_to_page(url='https://veri.bet/odds-picks?filter=upcoming')
-        # time.sleep(13)
-        print('2')
-        self.clicar_em_botao(xpath_botao='/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]')
-        self.esperar_elemento_aparecer(10, xpath_base)
-        print('3')
-        try:
-            dados_tabela = []
-
-            for i in range(2, num_linhas + 1):
-                xpath_elemento = f'{xpath_base}/tr[{i}]'
-                elemento = WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, xpath_elemento))
-                )
-                dados_tabela.append(elemento.text)
-                print(dados_tabela)
-            return dados_tabela
-
-        finally:
-            # Fechar o navegador
-            self.driver.quit()
-
-    def teste2(self, xpath_base, num_linhas): 
-        print('1')
-        self.go_to_page(url='https://veri.bet/odds-picks?filter=upcoming')
-        # time.sleep(13)
-        print('2')
-        self.clicar_em_botao(xpath_botao='/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]')
-        self.esperar_elemento_aparecer(10, xpath_base)
-        print('3')
-        try:
-            valores_td = []
-
-            for i in range(2, num_linhas + 1):
-                xpath_elemento_td = f'{xpath_base}/tr[{i}]/td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span'
-                elemento_td = WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, xpath_elemento_td))
-                )
-                valor_td = elemento_td.text
-                valores_td.append(valor_td)
-                print(valores_td)
-            return valores_td
-
-        finally:
-            # Fechar o navegador
-            self.driver.quit()
-
-    def teste3(self, xpath_base, num_linhas): 
-        print('1')
-        self.go_to_page(url='https://veri.bet/odds-picks?filter=upcoming')
-        # time.sleep(13)
-        print('2')
-        self.clicar_em_botao(xpath_botao='/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]')
-        self.esperar_elemento_aparecer(10, xpath_base)
-        print('3')
-        try:
-            valores_td = []
-
-            for i in range(2, num_linhas + 1):
-                xpath_elemento_tbody_1 = f'{xpath_base}/tr[{i}]/td/div/div/div/div[1]/div/div/div/div/table/tbody'
-                xpath_elemento_tbody_2 = f'{xpath_base}/tr[{i}]/td/div/div/div/div[2]/div/div/div/div/table/tbody'
-
-                elemento_tbody_1 = WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, xpath_elemento_tbody_1))
-                )
-                elemento_tbody_2 = WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, xpath_elemento_tbody_2))
-                )
-
-                valor_tbody_1 = self.clean_html(elemento_tbody_1.get_attribute("outerHTML"))
-                valor_tbody_2 = self.clean_html(elemento_tbody_2.get_attribute("outerHTML"))
-
-                # Remover caracteres de tabulação
-                valor_tbody_1 = self.remover_tabs(valor_tbody_1)
-                valor_tbody_2 = self.remover_tabs(valor_tbody_2)
-
-
-                valores_td.append((valor_tbody_1, valor_tbody_2))
-                print(valores_td)
-                print("#########################################################################################################")
-            return valores_td
-
-        finally:
-            # Fechar o navegador
-            self.driver.quit()
-
     def capture_number_games(self):
-        element = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]/span'))
-        )
+        try:
+            element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]/span'))
+            )
 
-        value = int(element.text)
+            value = int(element.text)
 
-        return value
+            return value
+        except Exception as e:
+            print(f"Error in capture_number_games(). CODE: {e}")
+            return None
 
-    def obter_valores_colunas(self, xpath_base):
-
+    def data_extract_bet(self, xpath_base: str):
+        print('web scraping started...')
         self.go_to_page(url='https://veri.bet/odds-picks?filter=upcoming')
 
         qtd_iterator = self.capture_number_games()
-        
         calc_for_iterator = qtd_iterator / 2 + 2
 
-        self.clicar_em_botao(xpath_botao='/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]')
-        self.esperar_elemento_aparecer(10, xpath_base)
+        self.click_btn(xpath_btn='/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]')
+        self.wait_for_element(10, xpath_base)
 
-        values_Bet = []
+        values_bet = []
         try:
+            print('downloading data, please wait!')
             for i in range(2, int(calc_for_iterator)):
-                print('iteracao: ', i)
-                # Esperar o elemento aparecer 
                 xpath_elemento_tr = f'{xpath_base}/tr[{i}]'
                 elemento_tr = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, xpath_elemento_tr))
                 )
 
-
                 for x in range(1,3):
                     item = Item()
-                    # Criar uma instância fora do loop
-                    
-                    # Atribuir valores à instância
+
                     item.sport_league = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[1]/a').text
                     item.event_date_utc = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[2]').text
                     item.team1 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
@@ -247,90 +136,33 @@ class Web_scraping_aux:
                     item.team = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
                     item.spread = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[3]/table/tbody/tr/td/span').text
 
-                    # Adicionar à lista
-                    values_Bet.append(item)
-
-                    # print(item.sport_league)
-                    # print(item.event_date_utc)
-                    # print(item.team1)
-                    # print(item.team2)
-                    # print(item.period)
-                    # print(item.price)
-                    # print(item.side)
-                    # print(item.team)
-                    # print(item.spread)
-            
-            print(values_Bet)
-                    
-
-            df = pd.DataFrame([vars(item) for item in values_Bet])
-
+                    values_bet.append(item)
+            # print(values_bet)
+            df = pd.DataFrame([vars(item) for item in values_bet])
             data_dict = {}
-            data_dict['Dados'] = df.to_dict('records')
-            print(df)
-
+            data_dict['Data bet'] = df.to_dict('records')
+            # print(df)
+            json_file_path = '../data/data_bet.json'
             js = json.dumps(data_dict)
-            fp = open('dados_bet.json', 'w')
-            fp.write(js)
-            fp.close()
+            with open(json_file_path, 'w') as fp:
+                fp.write(js)
+                fp.close()
 
-            # self.create_df_and_json(data=values_Bet)
-
-
-            # Retornar os valores em um array
-            return values_Bet
+            return values_bet
 
         except Exception as e:
-            print(f"Erro ao obter valores das colunas: {e}")
+            print(f"Error scraping data. CODE: {e}")
+            return None
+        finally:
+            self.close_browser()
+
+    def close_browser(self):
+        print('downloading completed...')
+        print('browser closed! Check the "data" folder in the project root')
+        try:
+            self.driver.quit()
+        except Exception as e:
+            print(f"Error close_browser(). CODE: {e}")
             return None
 
-    def data_extract(self, *, table_xpatch: str):
-        print('1')
-        self.go_to_page(url='https://veri.bet/odds-picks?filter=upcoming')
-        # time.sleep(13)
-        print('2')
-        self.clicar_em_botao(xpath_botao='/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]')
-        # print('3')
-        # Aguarde até que a tabela esteja presente
-        self.esperar_elemento_aparecer(10, table_xpatch)
-        print('3')
 
-        time.sleep(5)
-        # Encontre a tabela pelo XPath
-        tabela = self.driver.find_element(By.XPATH, table_xpatch)
-        # Obtenha todas as linhas da tabela
-        linhas_tabela = tabela.find_elements(By.TAG_NAME, 'tr')
-
-        dados = []
-
-        # Itera sobre as linhas da tabela e extrai os dados
-        for linha in linhas_tabela:
-            colunas = linha.find_elements(By.TAG_NAME, 'td')
-            dados_linha = [coluna.text for coluna in colunas]
-            dados.append(dados_linha)
-            print(dados)
-        return dados
-
-    def encontrar_elemento_por_id(self, element_id):
-        return self.driver.find_element(By.ID, element_id)
-
-    def clicar_elemento(self, elemento):
-        elemento.click()
-
-    def preencher_campo(self, elemento, texto):
-        elemento.send_keys(texto)
-
-    # def esperar_elemento_aparecer(self, timeout, element_id):
-    #     WebDriverWait(self.driver, timeout).until(
-    #         EC.presence_of_element_located((By.ID, element_id))
-    #     )
-
-    def fechar_navegador(self):
-        self.driver.quit()
-
-
-cmd  = Web_scraping_aux()
-# test = cmd.data_extract(table_xpatch='//*[@id="odds-picks"]/tbody/tr[1]/td/div[2]')
-test = cmd.obter_valores_colunas(xpath_base = '//*[@id="odds-picks"]/tbody')
-print(test) 
-# //*[@id="odds-picks"]/tbody/tr[2]/td
