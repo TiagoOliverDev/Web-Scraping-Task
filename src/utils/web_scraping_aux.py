@@ -4,9 +4,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from dataclasses import dataclass
 from webdriver_manager.chrome import ChromeDriverManager
+from datetime import datetime
 
 import json
 import pandas as pd
+import pytz
 
 
 @dataclass
@@ -27,6 +29,34 @@ class Item:
 class Web_scraping_aux:
     def __init__(self):
         self.driver = self.init_chrome_driver()
+
+    def convert_date_to_utc_iso(self, date_str: str):
+        try:
+            et_tz = pytz.timezone('US/Eastern')
+
+            date_hour = datetime.strptime(date_str, '%I:%M %p ET (%m/%d/%Y)')
+
+            date_hour_et = et_tz.localize(date_hour)
+
+            ddate_hour_utc = date_hour_et.astimezone(pytz.utc)
+
+            date_hour_iso = ddate_hour_utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+            return date_hour_iso
+        except Exception as e:
+            print(f"Error in convert_date_to_utc_iso(). CODE: {e}")
+            return None
+
+    def convert_to_float(self, value_for_convert: str):
+        try:
+            s_numeric = ''.join(c for c in value_for_convert if c.isdigit() or c in ['-', '.'])
+            
+            value_float = float(s_numeric)
+            
+            return value_float
+        except Exception as e:
+            value_float = 0
+            return value_float
 
     def create_df_and_json(self, data: str):
         try:
@@ -120,21 +150,25 @@ class Web_scraping_aux:
                     item = Item()
 
                     item.sport_league = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[1]/a').text
-                    item.event_date_utc = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[2]').text
+                    date = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[2]').text
+                    date_formated = self.convert_date_to_utc_iso(date_str=date)
+                    item.event_date_utc = date_formated
                     item.team1 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
                     item.team2 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
                     item.period = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[1]/span').text
                     item.price = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[2]/table/tbody/tr/td/span').text
-                    item.n2 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[2]/span').text
-                    item.title_spread = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[3]/span').text
-                    item.n4 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[4]/span').text
-                    item.n8 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[4]/table/tbody/tr/td/span').text
-                    item.n10 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[2]/table/tbody/tr/td/span').text
-                    item.n11 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[3]/table/tbody/tr/td/span').text
-                    item.n12 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[4]/table/tbody/tr/td/span').text
                     item.side = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
                     item.team = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
-                    item.spread = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[3]/table/tbody/tr/td/span').text
+                    spread_for_float = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[3]/table/tbody/tr/td/span').text
+                    spread_conveted = self.convert_to_float(value_for_convert=spread_for_float)
+                    item.spread = spread_conveted
+                    # item.n2 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[2]/span').text
+                    # item.title_spread = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[3]/span').text
+                    # item.n4 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[4]/span').text
+                    # item.n8 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[4]/table/tbody/tr/td/span').text
+                    # item.n10 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[2]/table/tbody/tr/td/span').text
+                    # item.n11 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[3]/table/tbody/tr/td/span').text
+                    # item.n12 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[4]/table/tbody/tr/td/span').text
 
                     values_bet.append(item)
             # print(values_bet)
@@ -148,6 +182,10 @@ class Web_scraping_aux:
                 fp.write(js)
                 fp.close()
 
+            with open(json_file_path, 'r') as fp:
+                json_bet = json.load(fp)
+                print(json.dumps(json_bet, indent=2))
+            
             return values_bet
 
         except Exception as e:
