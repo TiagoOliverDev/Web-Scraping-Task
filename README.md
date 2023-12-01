@@ -4,13 +4,15 @@ Technical Code Documentation
 
 Web scraping developed for the selection process
 
-# irectory Structure
+# Directory Structure
 
-# / |- data/ data_bet.json                    # result from web scraping
-#  |- src/
-#  |   |- utils/
-#  |       |- web_scraping_aux               # Module with auxiliary functions
-#  |   |- parse_veri_bet.py                  # Main program file
+/
+|- data/
+|- data_bet.json # result from web scraping
+|- src/
+|- utils/
+|- web_scraping_aux # Module with auxiliary functions
+|- parse_veri_bet.py # Main program file
 
 
 # Dependencies
