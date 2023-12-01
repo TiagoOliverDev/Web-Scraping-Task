@@ -7,6 +7,9 @@ from selenium.webdriver.chrome.service import  Service
 from dataclasses import dataclass, asdict
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import json
+from typing import List
+import pandas as pd
 
 import time
 
@@ -31,6 +34,17 @@ class Web_scraping_aux:
         
     def __init__(self):
         self.driver = self.init_chrome_driver()
+
+    def create_df_and_json(self, data: str):
+        df = pd.DataFrame(data)
+
+        data_dict = {}
+        data_dict['Dados'] = df.to_dict('records')
+
+        js = json.dumps(data_dict)
+        fp = open('dados_bet.json', 'w')
+        fp.write(js)
+        fp.close()
 
     def clean_html(self, html):
         # Utiliza o BeautifulSoup para extrair o texto do HTML sem as tags
@@ -64,7 +78,6 @@ class Web_scraping_aux:
         # # options.AddUserProfilePreference("profile.password_manager_enabled", false);
         # driver = webdriver.Chrome(service=service, options=options)
         # return driver
-
 
     def go_to_page(self, *, url: str):
         # driver = self.init_chrome_driver()
@@ -191,54 +204,51 @@ class Web_scraping_aux:
         self.esperar_elemento_aparecer(10, xpath_base)
         print('3')
         try:
-            # Esperar o elemento aparecer
+            # Esperar o elemento aparecer 
             xpath_elemento_tr = f'{xpath_base}/tr[2]'
             elemento_tr = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, xpath_elemento_tr))
             )
 
+
+            item = Item()
+
             values_Bet = []
-
             for x in range(1,3):
-                valores = {
-                    'period': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[1]/span').text,
-                    'n2': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[2]/span').text,
-                    'n3': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[3]/span').text,
-                    'n4': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[4]/span').text,
-                    'team1': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text,
-                    'price': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[2]/table/tbody/tr/td/span').text,
-                    'n7': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[3]/table/tbody/tr/td/span').text,
-                    'n8': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[4]/table/tbody/tr/td/span').text,
-                    'team2': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text,
-                    'n10': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[2]/table/tbody/tr/td/span').text,
-                    'n11': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[3]/table/tbody/tr/td/span').text,
-                    'n12': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[4]/table/tbody/tr/td/span').text,
-                    'sport_league': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[1]/a').text,
-                    'event_date_utc': elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[2]').text,
-                }
-            
-            values_Bet.append(valores)
+                # Criar uma instância fora do loop
 
+                # Atribuir valores à instância
+                item.sport_league = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[1]/a').text
+                item.event_date_utc = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[2]').text
+                item.team1 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
+                item.team2 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
+                item.period = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[1]/span').text
+                item.price = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[2]/table/tbody/tr/td/span').text
+                item.n2 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[2]/span').text
+                item.title_spread = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[3]/span').text
+                item.n4 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[1]/td[4]/span').text
+                item.n8 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[4]/table/tbody/tr/td/span').text
+                item.n10 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[2]/table/tbody/tr/td/span').text
+                item.n11 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[3]/table/tbody/tr/td/span').text
+                item.n12 = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[3]/td[4]/table/tbody/tr/td/span').text
+                item.side = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
+                item.team = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
+                item.spread = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[2]/td[3]/table/tbody/tr/td/span').text
 
-            # Obter os valores das colunas
-            n1 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[1]/td[1]/span').text
-            n2 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[1]/td[2]/span').text
-            n3 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[1]/td[3]/span').text
-            n4 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[1]/td[4]/span').text
-                                                     
-            n5 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[2]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
-            n6 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[2]/td[2]/table/tbody/tr/td/span').text
-            n7 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[2]/td[3]/table/tbody/tr/td/span').text
-            n8 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[2]/td[4]/table/tbody/tr/td/span').text
+                # Adicionar à lista
+                values_Bet.append(item)
 
-            n9 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[3]/td[1]/table/tbody/tr/td/table/tbody/tr/td[1]/a/span').text
-            n10 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[3]/td[2]/table/tbody/tr/td/span').text
-            n11 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[3]/td[3]/table/tbody/tr/td/span').text
-            n12 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[3]/td[4]/table/tbody/tr/td/span').text
+            self.create_df_and_json(data=values_Bet)
 
-            
-            n13 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[1]/a').text
-            n14 = elemento_tr.find_element(By.XPATH, './td/div/div/div/div[1]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[2]').text
+            print(item.sport_league)
+            print(item.event_date_utc)
+            print(item.team1)
+            print(item.team2)
+            print(item.period)
+            print(item.price)
+            print(item.side)
+            print(item.team)
+            print(item.spread)
 
             # Retornar os valores em um array
             return values_Bet

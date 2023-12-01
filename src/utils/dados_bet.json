@@ -1,0 +1,30 @@
+{
+    "Dados": [
+        {
+            "sport_league": "NFL",
+            "event_date_utc": "1:00 PM ET (12/3/2023)",
+            "team1": "Detroit Lions",
+            "team2": "New Orleans Saints",
+            "pitcher": "",
+            "period": "FULL GAME ODDS",
+            "line_type": "",
+            "price": "-209",
+            "side": "Detroit Lions",
+            "team": "Detroit Lions",
+            "spread": "-4\n(-115)"
+        },
+        {
+            "sport_league": "NFL",
+            "event_date_utc": "1:00 PM ET (12/3/2023)",
+            "team1": "Detroit Lions",
+            "team2": "New Orleans Saints",
+            "pitcher": "",
+            "period": "FULL GAME ODDS",
+            "line_type": "",
+            "price": "-209",
+            "side": "Detroit Lions",
+            "team": "Detroit Lions",
+            "spread": "-4\n(-115)"
+        }
+    ]
+}
