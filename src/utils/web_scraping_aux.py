@@ -194,15 +194,34 @@ class Web_scraping_aux:
             # Fechar o navegador
             self.driver.quit()
 
+    def capture_number_games(self):
+        element = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]/span'))
+        )
+
+        value = int(element.text)
+
+        return value
 
     def obter_valores_colunas(self, xpath_base):
+        # item = Item()
+
         print('1')
         self.go_to_page(url='https://veri.bet/odds-picks?filter=upcoming')
         # time.sleep(13)
         print('2')
+
+        qtd_iterator = self.capture_number_games()
+        
+        calc_for_iterator = qtd_iterator / 2 + 1
+        print('qtd', calc_for_iterator)
+
         self.clicar_em_botao(xpath_botao='/html/body/div[2]/div/div/div[1]/div/div[3]/div/a[1]')
         self.esperar_elemento_aparecer(10, xpath_base)
         print('3')
+
+        # for i in range(2, 7):
+        #     print('iteracao', i)
         try:
             # Esperar o elemento aparecer 
             xpath_elemento_tr = f'{xpath_base}/tr[2]'
@@ -210,13 +229,10 @@ class Web_scraping_aux:
                 EC.presence_of_element_located((By.XPATH, xpath_elemento_tr))
             )
 
-
-            item = Item()
-
             values_Bet = []
             for x in range(1,3):
                 # Criar uma instância fora do loop
-
+                item = Item()
                 # Atribuir valores à instância
                 item.sport_league = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[1]/a').text
                 item.event_date_utc = elemento_tr.find_element(By.XPATH, f'./td/div/div/div/div[{x}]/div/div/div/div/table/tbody/tr[4]/td[1]/table/tbody/tr/td/span[2]').text
@@ -238,17 +254,30 @@ class Web_scraping_aux:
                 # Adicionar à lista
                 values_Bet.append(item)
 
-            self.create_df_and_json(data=values_Bet)
+                print(item.sport_league)
+                print(item.event_date_utc)
+                print(item.team1)
+                print(item.team2)
+                print(item.period)
+                print(item.price)
+                print(item.side)
+                print(item.team)
+                print(item.spread)
+                
 
-            print(item.sport_league)
-            print(item.event_date_utc)
-            print(item.team1)
-            print(item.team2)
-            print(item.period)
-            print(item.price)
-            print(item.side)
-            print(item.team)
-            print(item.spread)
+            df = pd.DataFrame([vars(item) for item in values_Bet])
+
+            data_dict = {}
+            data_dict['Dados'] = df.to_dict('records')
+            print(df)
+
+            js = json.dumps(data_dict)
+            fp = open('dados_bet.json', 'w')
+            fp.write(js)
+            fp.close()
+
+            # self.create_df_and_json(data=values_Bet)
+
 
             # Retornar os valores em um array
             return values_Bet
@@ -256,9 +285,6 @@ class Web_scraping_aux:
         except Exception as e:
             print(f"Erro ao obter valores das colunas: {e}")
             return None
-
-
-
 
     def data_extract(self, *, table_xpatch: str):
         print('1')
