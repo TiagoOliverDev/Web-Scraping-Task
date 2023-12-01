@@ -4,6 +4,7 @@ Technical Code Documentation
 
 Web scraping developed for the selection process
 
+
 # Dependencies
 - Python 3.10 or higher
 - Libraries: [selenium, webdriver-manager]
