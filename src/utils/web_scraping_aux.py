@@ -176,7 +176,7 @@ class Web_scraping_aux:
             data_dict = {}
             data_dict['Data bet'] = df.to_dict('records')
             # print(df)
-            json_file_path = '../data/data_bet.json'
+            json_file_path = 'data/data_bet.json'
             js = json.dumps(data_dict)
             with open(json_file_path, 'w') as fp:
                 fp.write(js)

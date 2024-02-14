@@ -1,5 +1,4 @@
-from utils.web_scraping_aux import Web_scraping_aux
-
+from src.utils import Web_scraping_aux
 
 class Parse_veri_bet:
 
