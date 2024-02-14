@@ -1,9 +1,9 @@
 # Web scraping
 > Web scraping done on the page https://veri.bet/odds-picks?filter=upcoming to bring the latest odds of the moment NBA
 
-![ft1](https://github.com/TiagoOliverDev/Web-Scraping-Task/blob/feature/main/src/assets/ft01.png)
+![ft1](https://github.com/TiagoOliverDev/Web-Scraping-Task/blob/main/src/assets/ft01.png)
 
-![ft2](https://github.com/TiagoOliverDev/Web-Scraping-Task/blob/feature/main/src/assets/ft02.png)
+![ft2](https://github.com/TiagoOliverDev/Web-Scraping-Task/blob/main/src/assets/ft02.png)
 
 
 ## Built With
