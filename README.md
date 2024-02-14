@@ -1,21 +1,86 @@
-Technical Code Documentation
+# Web scraping
+> Web scraping done on the page https://veri.bet/odds-picks?filter=upcoming to bring the latest odds of the moment NBA
 
-# Overview
+![ft1](https://github.com/TiagoOliverDev/Web-Scraping-Task/blob/feature/main/src/assets/ft01.png)
 
-Web scraping developed for the selection process
+![ft2](https://github.com/TiagoOliverDev/Web-Scraping-Task/blob/feature/main/src/assets/ft02.png)
 
 
-# Dependencies
-- Python 3.10 or higher
-- Libraries: [selenium, webdriver-manager, pandas]
+## Built With
 
-# Installation
-1. Clone the repository: `git clone https://github.com/TiagoOliverDev/Web-Scraping-Task`
-2. Navigate to the directory: `cd src`
-3. Install dependencies: `pip install -r requirements.txt` or `pip install selenium` , `pip install webdriver-manager`, `pip install pandas`
+- Python >= 3.8.10
+- selenium
+- Pandas
 
-# How to Run project
-1. In the terminal, run: `python src/parse_veri_bet.py`
+
+# Getting Started
+## Prerequisites:
+
+
+- Create an account on github
+
+- Install gitbash or use git on the command line.
+
+- Use an IDE of your preference such as VScode.
+
+## Steps to follow:
+
+- Choose a folder in your local machine where you want this repository to be copied
+
+- Clone this [repository](https://github.com/TiagoOliverDev/Web-Scraping-Task) to your local machine 
+- ```
+  git clone git@github.com:TiagoOliverDev/Web-Scraping-Task.git
+  ```
+
+- Navigate to `cd Web-Scraping-Task`  directory.
+
+- Open in Vs code
+
+- Create venv
+- ```
+  python -m venv env
+
+  env\Scripts\activate
+  ``` 
+
+- To install all the app dependencies on the command line run
+- ```
+  pip install -r requirements.txt
+  ``` 
+- To run app in the development mode run 
+- ```
+  python main.py
+  ```
+
+
+## Author
+
+:man: **Tiago Oliveira**
+
+- [GitHub](https://github.com/TiagoOliverDev/)
+- [LinkedIn](https://www.linkedin.com/in/tiago-oliveira-49a2a6205/)
+
+## 🤝 Contributing
+- Contributions, issues, and feature requests are welcome!
+- Feel free to check the [issues page](https://github.com/TiagoOliverDev/Web-Scraping-Task/issues).
+
+# Show your support
+Give a ⭐ if you like this project!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
